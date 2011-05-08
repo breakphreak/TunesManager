@@ -78,15 +78,23 @@
 <form enctype="multipart/form-data" id="upload_form" name="upload_form" method="POST" action="UploaderServlet" onsubmit="post_form(); return false;" target="upload_target">
 <input name="file" size="27" type="file" id="file" /> <br/> 
 Choose a file <br />  
-<input type="submit" name="actionButton" value="Upload" /><br /> 
+<input type="submit" name="uploadSubmitButton" value="Upload" /><br /> 
 <br />  
 </form> 
+
+<form enctype="text/plain" id="usercomment_form" method="POST" action="UsercommentServlet" onsubmit="return false;" target="usercomment_target">
+Type your comment here:<br/>
+<input name="usercomment" type="text" size="50"/>
+<input type="submit" name="usercommentSubmitButton" value="Set Comment" /><br />
+<br/>
+</form>
 
 <div id="progress_bar">
 Please choose a file to upload and press "Upload".
 </div> 
 
 <iframe id="upload_target" name="upload_target" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe>
+<iframe id="usercomment_target" name="usercomment_target" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe>
 </body>
 </html>
 </jsp:root>

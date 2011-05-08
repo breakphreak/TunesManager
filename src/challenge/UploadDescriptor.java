@@ -20,9 +20,10 @@ public class UploadDescriptor implements java.io.Serializable {
 	private int partsSoFar;
 	private int totalParts;
 	private Status status; // TODO: later an error message / exception stack trace can be incorporated
+	private String userComment;
 
 	public UploadDescriptor() {
-		absolutePath = null;
+		userComment = absolutePath = null;
 		totalParts = bytesSoFar = partsSoFar = 0;
 		status = Status.DOING;
 	}
@@ -89,11 +90,25 @@ public class UploadDescriptor implements java.io.Serializable {
 	}
 
 	public synchronized String toJsonString() {
-		String statusString = new String();
-		
+		String statusString = new String();		
 		if (getStatus() == Status.DONE) {
 			statusString = " , \"totalBytes\" : " + totalBytes;
 		}
-		return "{ \"status\" : \"" + getStatus() + "\", \"progress\" : " + getPercentage() + statusString + " }";
+		
+		String userCommentString = new String();
+		if (getUserComment() != null)  {
+			userCommentString = " , \"userComment\" : " + getUserComment();
+		}
+		
+		return "{ \"status\" : \"" + getStatus() + "\", \"progress\" : " + getPercentage() + statusString + userCommentString + " }";
+	}
+
+	public void setUserComment(String userComment) {
+		String tmp = userComment.trim();
+		this.userComment = ( tmp.length() == 0 ? null : tmp ); 
+	}
+
+	public String getUserComment() {
+		return userComment;
 	}
 }
