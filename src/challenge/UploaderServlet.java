@@ -74,7 +74,7 @@ public class UploaderServlet extends HttpServlet {
 				}
 
 				log("processing file: " + filename + ", fieldname=" + fieldname);
-				handleFileName(filename, part, uploadDescriptor);
+				handleFilePart(filename, part, uploadDescriptor);
 			} else {
 				log("filename was empty, will do nothing");
 			}
@@ -83,7 +83,7 @@ public class UploaderServlet extends HttpServlet {
 		}
 	}
 
-	private void handleFileName(String filename, Part part, UploadDescriptor uploadDescriptor) throws ServletException {
+	private void handleFilePart(String filename, Part part, UploadDescriptor uploadDescriptor) throws ServletException {
 		// fetch the the uploaded files map or create it for the first time
 		FileOutputStream out = null;
 		

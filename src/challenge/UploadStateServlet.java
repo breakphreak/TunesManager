@@ -28,7 +28,7 @@ public class UploadStateServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		//response.setContentType("application/json");
 
-		HttpSession session = request.getSession(false); // don't create session if wasn't created before
+		HttpSession session = request.getSession(false); // don't create session if it wasn't created before
 		
 		if (session == null) {
 			throw new ServletException("Illegal application state: no session had been opened yet");
