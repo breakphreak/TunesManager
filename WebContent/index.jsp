@@ -17,33 +17,42 @@
 	var http = createRequestObject();
 	function createRequestObject() {
 		var objAjax;
-		var browser = navigator.appName;
-		if (browser == "Microsoft Internet Explorer") {
-			objAjax = new ActiveXObject("Microsoft.XMLHTTP");
-		} else {
-			objAjax = new XMLHttpRequest();
+		if (window.XMLHttpRequest)
+		{// code for IE7+, Firefox, Chrome, Opera, Safari
+			objAjax=new XMLHttpRequest();
+		}
+		else
+		{// code for IE6, IE5
+			objAjax=new ActiveXObject("Microsoft.XMLHTTP");
 		}
 		return objAjax;
 	}
 	
     function display_progress() {
 		if (http.readyState == 4) {
-    		var resp = eval('(' + http.responseText + ')'); // TODO: handle error when response text is not parseable!!!
-    		
-    		console.debug(resp);
-    		
-    		var status = resp['status'];
-    		if (status == 'UNKNOWN' || status == 'DOING') {
-        		document.getElementById('progress_bar').innerHTML = "Uploaded: " + resp['progress'] + "%";    			
-    		} else if (status == 'DONE'){
-        		document.getElementById('progress_bar').innerHTML = "Uploaded 100% (" + resp['totalBytes'] + " bytes)! Your file is here: " + resp['url'];
-    		} else if (status == 'ERROR') {
-    			document.getElementById('progress_bar').innerHTML = "Error while uploading! Please fix it as you are the developer :)";
-    		} else {
-    			document.getElementById('progress_bar').innerHTML = "Unexpected state: " + status + "! Noone should fix it bu you :)";
-    		}
-
-			setTimeout("update_progress()", 500);
+			if (http.status !=200) {
+				document.getElementById('progress_bar').innerHTML = "Wrong response status received: " + http.status + "! Fix the server-side code.";
+				setTimeout("update_progress()", 500);
+			} else {
+				try {
+		    		var resp = eval('(' + http.responseText + ')');				
+		    		var status = resp['status'];
+		    		
+		    		if (status == 'UNKNOWN' || status == 'DOING') {
+		        		document.getElementById('progress_bar').innerHTML = "Uploaded: " + resp['progress'] + "%";    			
+		    		} else if (status == 'DONE'){
+		        		document.getElementById('progress_bar').innerHTML = "Uploaded 100% (" + resp['totalBytes'] + " bytes)! Your file is here: " + resp['url'];
+		    		} else if (status == 'ERROR') {
+		    			document.getElementById('progress_bar').innerHTML = "Error while uploading!";
+		    		} else {
+		    			document.getElementById('progress_bar').innerHTML = "Unexpected state: " + status + "! Fix the server-side code.";
+		    		}
+				} catch (ex) {
+					document.getElementById('progress_bar').innerHTML = "Wrong response received: " + resp + "! Fix the server-side code.";
+				}
+	    			
+				setTimeout("update_progress()", 500);
+			}
 		}
 	}  
     

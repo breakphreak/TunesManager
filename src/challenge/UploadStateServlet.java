@@ -26,7 +26,7 @@ public class UploadStateServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		//response.setContentType("application/json");
+		response.setContentType("application/json");
 
 		HttpSession session = request.getSession(false); // don't create session if it wasn't created before
 		
