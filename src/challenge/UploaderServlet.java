@@ -1,4 +1,4 @@
-package test;
+package challenge;
 
 import java.io.*;
 import java.util.*;

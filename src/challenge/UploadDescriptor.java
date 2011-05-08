@@ -1,4 +1,4 @@
-package test;
+package challenge;
 
 // needs to be synchronized, since more then a single servlet (execution context) instance might access the same descriptor at once
 public class UploadDescriptor implements java.io.Serializable {
