@@ -89,6 +89,11 @@ public class UploadDescriptor implements java.io.Serializable {
 	}
 
 	public synchronized String toJsonString() {
-		return "{ \"status\" : \"" + getStatus() + "\", \"progress\" : " + getPercentage() + " }";
+		String statusString = new String();
+		
+		if (getStatus() == Status.DONE) {
+			statusString = " , \"totalBytes\" : " + totalBytes;
+		}
+		return "{ \"status\" : \"" + getStatus() + "\", \"progress\" : " + getPercentage() + statusString + " }";
 	}
 }

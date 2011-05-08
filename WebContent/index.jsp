@@ -29,28 +29,27 @@
     function display_progress() {
 		if (http.readyState == 4) {
     		var resp = eval('(' + http.responseText + ')'); // TODO: handle error when response text is not parseable!!!
-    		document.getElementById('progress_bar').innerHTML = "Status: " + resp.progress + "%";
-    	/*
-		var resp = eval('(' + o.responseText + ')'); 
-		if(!resp['done']) {   
-			var pct = parseInt(100*(resp['current']/resp['total'])); 
-			document.getElementById('pbar').style.width = ''+pct+'%'; 
-			document.getElementById('ppct').innerHTML = " "+pct+"%"; 
-			setTimeout("update_progress()",500); 
-		} else if(resp['cancel_upload']) { 
-			txt="Cancelled after "+resp['current']+" bytes!";  
-			document.getElementById('ptxt').innerHTML = txt; 
-			setTimeout("progress_win.hide(); window.location.reload();",2000); 
-			window.location = "<?php echo $redirect; ?>";
-		} 
-		*/
-			setTimeout("update_progress()",500);
+    		
+    		console.debug(resp);
+    		
+    		var status = resp['status'];
+    		if (status == 'UNKNOWN' || status == 'DOING') {
+        		document.getElementById('progress_bar').innerHTML = "Uploaded: " + resp['progress'] + "%";    			
+    		} else if (status == 'DONE'){
+        		document.getElementById('progress_bar').innerHTML = "Uploaded 100% (" + resp['totalBytes'] + " bytes)! Your file is here: " + resp['url'];
+    		} else if (status == 'ERROR') {
+    			document.getElementById('progress_bar').innerHTML = "Error while uploading! Please fix it as you are the developer :)";
+    		} else {
+    			document.getElementById('progress_bar').innerHTML = "Unexpected state: " + status + "! Noone should fix it bu you :)";
+    		}
+
+			setTimeout("update_progress()", 500);
 		}
 	}  
     
     function update_progress() {  
     	var request = 'UploadStateServlet';
-    	console.debug('requesting: ' + request);
+    	// console.debug('requesting: ' + request); // doesn't work on IE
 		http.open('get', request);
 		http.onreadystatechange = display_progress;
 		http.send(null);
@@ -64,6 +63,8 @@
 
 </head>
 <body>
+
+<jsp:expression>session.getId()</jsp:expression>
 
 <form enctype="multipart/form-data" id="upload_form" name="upload_form" method="POST" action="UploaderServlet" onsubmit="post_form(); return false;" target="upload_target">
 <input name="file" size="27" type="file" id="file" /> <br/> 
