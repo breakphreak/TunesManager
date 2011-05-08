@@ -13,7 +13,7 @@
   
   <servlet>
 	<servlet-name>UploaderServlet</servlet-name>
-	<servlet-class>test.UploaderServlet</servlet-class>
+	<servlet-class>challenge.UploaderServlet</servlet-class>
 	<init-param>
 		<param-name>uploadDir</param-name>
 		<param-value>C:\tmp_labs</param-value>
@@ -26,12 +26,12 @@
   </servlet-mapping>
   
   <servlet>
-  	<servlet-name>FileStateServlet</servlet-name>
-  	<servlet-class>test.FileStateServlet</servlet-class>
+  	<servlet-name>UploadStateServlet</servlet-name>
+  	<servlet-class>challenge.UploadStateServlet</servlet-class>
   </servlet>
   
   <servlet-mapping>
-	<servlet-name>FileStateServlet</servlet-name>
-	<url-pattern>/FileStateServlet</url-pattern>
+	<servlet-name>UploadStateServlet</servlet-name>
+	<url-pattern>/UploadStateServlet</url-pattern>
   </servlet-mapping>
 </web-app>

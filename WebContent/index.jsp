@@ -14,8 +14,6 @@
 <title>Tunes Uploader</title>
 
 <script type="text/javascript"> 
-	const UPLOAD_ID = <jsp:expression>(int) (Math.random() * 10000)</jsp:expression>;
-
 	var http = createRequestObject();
 	function createRequestObject() {
 		var objAjax;
@@ -30,7 +28,7 @@
 	
     function display_progress() {
 		if (http.readyState == 4) {
-    		var resp = eval('(' + http.responseText + ')');
+    		var resp = eval('(' + http.responseText + ')'); // TODO: handle error when response text is not parseable!!!
     		document.getElementById('progress_bar').innerHTML = "Status: " + resp.progress + "%";
     	/*
 		var resp = eval('(' + o.responseText + ')'); 
@@ -51,7 +49,7 @@
 	}  
     
     function update_progress() {  
-    	var request = 'FileStateServlet?upload_id='+UPLOAD_ID;
+    	var request = 'UploadStateServlet';
     	console.debug('requesting: ' + request);
 		http.open('get', request);
 		http.onreadystatechange = display_progress;
@@ -60,7 +58,6 @@
    	} 
     
     function post_form() {
-    	document.getElementById('upload_id').value = UPLOAD_ID; // TODO: move it to the page init?
     	update_progress();
     }
 </script>
@@ -71,8 +68,7 @@
 <form enctype="multipart/form-data" id="upload_form" name="upload_form" method="POST" action="UploaderServlet" onsubmit="post_form(); return false;" target="upload_target">
 <input name="file" size="27" type="file" id="file" /> <br/> 
 Choose a file <br />  
-<input type="submit" name="actionButton" value="Upload" /><br />
-<input type="hidden" name="upload_id" id="upload_id" value="VALUE_TO_BE_REPLACED_BY_JAVASCRIPT"/> 
+<input type="submit" name="actionButton" value="Upload" /><br /> 
 <br />  
 </form> 
 
