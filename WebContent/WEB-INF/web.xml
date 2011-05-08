@@ -34,4 +34,8 @@
 	<servlet-name>UploadStateServlet</servlet-name>
 	<url-pattern>/UploadStateServlet</url-pattern>
   </servlet-mapping>
+  <error-page>
+  	<exception-type>javax.servlet.ServletException</exception-type>
+  	<location>/error.jsp</location>
+  </error-page>
 </web-app>

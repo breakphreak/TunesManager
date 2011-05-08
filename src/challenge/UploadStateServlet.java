@@ -29,20 +29,25 @@ public class UploadStateServlet extends HttpServlet {
 		//response.setContentType("application/json");
 
 		HttpSession session = request.getSession(false); // don't create session if wasn't created before
-		UploadDescriptor upload_descriptor = UploadDescriptor.UNKNOWN;
-
-		if (session != null) {
-			Object upload_descriptor_obj = session.getAttribute(Constants.UPLOAD_DESCRIPTOR_KEY);
-
-			if (upload_descriptor_obj != null) {
-				if (!(upload_descriptor_obj instanceof UploadDescriptor)) {
-					throw new ServletException("Illegal input: wrong object type had been found in session under \"" + Constants.UPLOAD_DESCRIPTOR_KEY + "\" key");
-				}
-				
-				upload_descriptor = (UploadDescriptor)upload_descriptor_obj;
-			}
+		
+		if (session == null) {
+			throw new ServletException("Illegal application state: no session had been opened yet");
 		}
 
+		Object upload_descriptor_obj = session.getAttribute(Constants.UPLOAD_DESCRIPTOR_KEY);
+		UploadDescriptor upload_descriptor = UploadDescriptor.UNKNOWN;
+		
+		if (upload_descriptor_obj != null) {
+			if (!(upload_descriptor_obj instanceof UploadDescriptor)) {
+				throw new ServletException(
+						"Illegal application state: wrong object type had been found in session under \"" + Constants.UPLOAD_DESCRIPTOR_KEY + "\" key: " +
+						"Expected: " + UploadDescriptor.class.getName() + ", found: " + upload_descriptor_obj.getClass().getName() + ""
+					);
+			}
+			
+			upload_descriptor = (UploadDescriptor)upload_descriptor_obj;
+		}
+		
 		PrintWriter pw = response.getWriter();
 		pw.println(upload_descriptor.toJsonString());
 	}

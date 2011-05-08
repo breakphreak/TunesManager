@@ -10,9 +10,7 @@ import javax.servlet.annotation.MultipartConfig;
 /**
  * Processes the form, uploads the file and puts all the relevant upload-related info into the http session.
  */
-@MultipartConfig(location = "c:\\tmp_labs")
-// , fileSizeThreshold=1024*1024*10, maxFileSize=1024*1024*100,
-// maxRequestSize=1024*1024*5*100)
+@MultipartConfig(location = "c:\\tmp_labs") // , fileSizeThreshold=1024*1024*10, maxFileSize=1024*1024*100, maxRequestSize=1024*1024*5*100)
 public class UploaderServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -36,11 +34,13 @@ public class UploaderServlet extends HttpServlet {
 		}
 	}
 
-	// @SuppressWarnings("unused")
-	// TODO: I do check it! what's the better code to get rid of the warning?
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		Set<String> upload_filenames = new HashSet<String>(); // to be used later to validate that only single file is being submitted
-		HttpSession session = request.getSession();
+		HttpSession session = request.getSession(false); // the session should be pre-created by JSP
+		
+		if (session == null) {
+			throw new ServletException("Illegal application state: no session had been opened yet");
+		}
 		
 		// first, replace the upload descriptor - currently there can be only one file at a time, any previous info is irrelevant
 		UploadDescriptor uploadDescriptor = new UploadDescriptor();
@@ -115,21 +115,19 @@ public class UploaderServlet extends HttpServlet {
 				out.write(buffer, 0, len);
 				len = filecontent.read(buffer);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log("Error while processing file upload: " + e.getMessage());
 			if (uploadDescriptor != null) {
 				uploadDescriptor.setErrorStatus();
 			}
-			// TODO: internal error, notify and handle
-			// TODO: what about NetworkExceptions (client disconnect etc)?
 		} finally {
 			try {
 				if (out != null) {
 					out.flush();
-					out.close(); // TODO: does 'close()' imply 'flush()'?
+					out.close();
 				}
-			} catch (IOException ignored) {
-				// TODO: issue some log message as there is nothing else to do
+			} catch (IOException e) {
+				log("Internal error: excepton while cleanup: " + e.getMessage());
 			}
 		}
 	}
