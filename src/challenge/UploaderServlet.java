@@ -78,11 +78,12 @@ public class UploaderServlet extends HttpServlet {
 				log("filename was empty, will do nothing");
 			}
 			uploadDescriptor.incrementPartsSoFar();
-			log("upload descriptor: " + uploadDescriptor.toJsonString());
-			
-			PrintWriter pw = response.getWriter();
-			pw.println(uploadDescriptor.toJsonString());
 		}
+		log("upload descriptor: " + uploadDescriptor.toJsonString());
+		
+		PrintWriter pw = response.getWriter();
+		pw.println(uploadDescriptor.toJsonString());
+		log("file uploaded completely");
 	}
 
 	private void handleFilePart(String filename, Part part, UploadDescriptor uploadDescriptor) throws ServletException {
@@ -114,6 +115,12 @@ public class UploaderServlet extends HttpServlet {
 			int len = filecontent.read(buffer);
 			while (len != -1) {
 				uploadDescriptor.increaseBytesSoFar(len);
+				/*
+				log(
+						"Received: " + len + " bytes, total bytes received: " + 
+						uploadDescriptor.getBytesSoFar() + ", expected to receive about " + uploadDescriptor.getTotalBytes() + " bytes"
+				);
+				*/
 				out.write(buffer, 0, len);
 				len = filecontent.read(buffer);
 			}

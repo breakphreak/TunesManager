@@ -72,16 +72,18 @@
     	
     function display_progress(http) {
 		if (http.readyState == 4) {
+			var again = false;
+			
 			if (http.status != 200) {
 				document.getElementById('progress_bar').innerHTML = "Wrong response status received: " + http.status + "! Fix the server-side code.";
-				setTimeout("update_progress()", 500);
 			} else {
 				try {
 		    		var resp = eval('(' + http.responseText + ')');				
 		    		var status = resp['status'];
 		    		
-		    		if (status == 'UNKNOWN' || status == 'DOING') {
-		        		document.getElementById('progress_bar').innerHTML = "Uploaded: " + resp['progress'] + "%";    			
+		    		if (status == 'DOING') {
+		        		document.getElementById('progress_bar').innerHTML = "Uploaded: " + resp['progress'] + "%";
+		        		again = true;
 		    		} else if (status == 'DONE'){
 		        		document.getElementById('progress_bar').innerHTML = "Uploaded 100% (" + resp['totalBytes'] + " bytes)! Your file is here: " + resp['url'];
 		    		} else if (status == 'ERROR') {
@@ -92,7 +94,9 @@
 				} catch (ex) {
 					document.getElementById('progress_bar').innerHTML = "Wrong response received: " + resp + "! Fix the server-side code.";
 				}
-	    			
+			}
+			
+			if (again) {
 				setTimeout("update_progress()", 500);
 			}
 		}
@@ -136,7 +140,6 @@
 </head>
 <body>
 
-<jsp:expression>session.getId()</jsp:expression>
 <jsp:scriptlet>
 // first, replace the upload descriptor - currently there can be only one file at a time, any previous info is irrelevant
 SessionResourceManager.createUploadDescriptor(request);

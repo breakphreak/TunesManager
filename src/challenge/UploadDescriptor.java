@@ -65,14 +65,18 @@ public class UploadDescriptor implements java.io.Serializable {
 		return totalParts;
 	}
 
-	public synchronized double getPercentage() {
-		// TODO: we are cheating here a bit, counting parts and not bytes
-		// on the other hand, total bytes count ALL the bytes in request (including other form fields)
-		// so the file size will be always less then form size, since a form usually includes the file and more fields
-		// (such as input fields or "submit" button) 
-		// Anyways, parts are good enough for big files at this stage and all the other info is already here 
-		// to switch to more sophisticated/trustworthy calculation.
-		return totalParts != 0 ? ((double) partsSoFar / (double) totalParts) : 0;
+	public synchronized int getPercentage() {
+		// TODO: we are cheating here a bit:
+		// COMPLETION (100% only) is counted when all the parts are received
+		// ONGOING PERCENTAGE/PROGRESS is counted as long as bytes are received
+		// REASON: currently total bytes count ALL the bytes in request (including other form fields etc)
+		// so the file size will be always LESS then request body size. However, the multipart request is received fully
+		// only when all its parts are received, hence the main condition (totalParts == partsSoFar).
+		return (
+				(getTotalParts() == getPartsSoFar()) 
+					? 100 
+					: (int)(getBytesSoFar()*100/getTotalBytes())
+		);
 	}
 
 	public synchronized Status getStatus() {
