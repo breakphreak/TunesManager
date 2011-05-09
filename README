@@ -1,1 +1,31 @@
 The SoundCloud developer position challenge. Implemented in Java/Servlets 3.0.
+
+SERVER-SIDE TECHNOLOGY SELECTION:
+* Didn't selected Ruby/Python/Haskell as never programmed in those langs (yet)
+* Didn't selected PHP as multipart/form-data upload functionality can be handled only when using PHP extensions (APC etc) and the challenge mentioned "minimal dependency".
+* Didn't selected node.js as the product seems to evolve much faster then its documentation on the web
+* Implemented in Java/Servlets: highlights from back then, mature framework/library, solid documentation and plenty of examples on the web, mature development/deployment tools
+
+CLIENT-SIDE TECHNOLOGY:
+* Plain JavaScript, no libraries (as requested)
+
+DESIGN BIRDVIEW:
+JSP pages:
+* One (entry) JSP page: index.jsp that opens/resets the session, presents the file upload form and the comment update form
+* One JSP page the application errors land to
+
+Servlets:
+** UploaderServlet - handles a multipart/form-data request and saves the data into the file on the server
+** RetrieverServlet - receives a filename of the uploaded file and streams the file contents to the user
+** UploadStateServlet - returns an information regarding the file being uploaded (completion percentage etc)
+
+Infrastructure classes:
+* UploadDescriptor - keeps all the information regarding the file being uploaded. This is the main sharing point between UploaderServlet and UploadStateServlet. Due to the limitations there is only one UploadDescriptor per HttpSession that can be reused sequentially.
+* SessionResourceManager - helps to retrieve the UploadDescriptor from the session.
+* Constants - I don't really need to tell you what to expect, right? :)
+
+LIMITATIONS:
+* Single file can be uploaded at a time
+* Once a file is uploaded, the form/session must be reset in order to upload more files
+* Intolerance to "forward/back" browser buttons
+
