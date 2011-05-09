@@ -45,48 +45,60 @@ public class UploaderServlet extends HttpServlet {
 		}
 		
 		UploadDescriptor uploadDescriptor = SessionResourceManager.getUploadDescriptor(request); // will throw exception if upload descriptor is not in the session
-		uploadDescriptor.setTotalBytes(request.getContentLength()); // form size = file size + other input fields size
-
-		Collection<Part> parts = request.getParts();
-		uploadDescriptor.setTotalParts(parts.size());
-
-		for (Part part : parts) {
-			log("processing part N" + (uploadDescriptor.getPartsSoFar()+1) + " of " + uploadDescriptor.getTotalParts());
-
-			String filename = getFilename(part);
-
-			if (filename == null) {
-				// Process regular form field (input
-				// type="text|radio|checkbox|etc", select, etc).
-				String fieldname = part.getName();
-				String fieldvalue = getValue(part);
-
-				log("processed input field: " + fieldname + " -> " + fieldvalue); // actually, no fields are expected
-			} else if (!filename.isEmpty()) {
-				// Process form file field (input type="file").
-				String fieldname = part.getName();
-
-				filename = filename.substring(filename.lastIndexOf('/') + 1).substring(filename.lastIndexOf('\\') + 1); // MSIE fix.
-				upload_filenames.add(filename);
-				if (upload_filenames.size() > 1) {
-					throw new ServletException("Illegal input: currently only one file at a time can be uploaded");
-				}
-
-				log("processing file: " + filename + ", fieldname=" + fieldname);
-				handleFilePart(filename, part, uploadDescriptor);
-			} else {
-				log("filename was empty, will do nothing");
-			}
-			uploadDescriptor.incrementPartsSoFar();
-		}
-		log("upload descriptor: " + uploadDescriptor.toJsonString());
 		
-		PrintWriter pw = response.getWriter();
-		pw.println(uploadDescriptor.toJsonString());
-		log("file uploaded completely");
+		try {
+			uploadDescriptor.setTotalBytes(request.getContentLength()); // form size = file size + other input fields size
+	
+			Collection<Part> parts = request.getParts();
+			
+			int partsCount = parts.size();
+			int currentPart = 0;
+	
+			for (Part part : parts) {
+				log("----- [START] processing part " + ++currentPart + " of " + partsCount);
+	
+				String filename = getFilename(part);
+	
+				if (filename == null) {
+					// Process regular form field (input
+					// type="text|radio|checkbox|etc", select, etc).
+					String fieldname = part.getName();
+					String fieldvalue = getValue(part);
+	
+					log("processed input field: " + fieldname + " -> " + fieldvalue); // actually, no fields are expected
+				} else if (!filename.isEmpty()) {
+					// Process form file field (input type="file").
+					String fieldname = part.getName();
+	
+					filename = filename.substring(filename.lastIndexOf('/') + 1).substring(filename.lastIndexOf('\\') + 1); // MSIE fix.
+					upload_filenames.add(filename);
+					if (upload_filenames.size() > 1) {
+						throw new ServletException("Illegal input: currently only one file at a time can be uploaded");
+					}
+	
+					log("processing file: " + filename + ", fieldname=" + fieldname);
+					handleFilePart(filename, part, uploadDescriptor);
+				} else {
+					log("filename was empty, will do nothing");
+				}
+				
+				log("----- [END] processing part " + ++currentPart + " of " + partsCount);
+			}
+
+			uploadDescriptor.setDoneStatus();
+			log("file uploaded completely");
+		}
+		catch (IOException e) {
+			uploadDescriptor.setErrorStatus();
+			log("Error while processing file upload: " + e.getMessage());
+		} finally {
+			PrintWriter pw = response.getWriter();
+			pw.println(uploadDescriptor.toJsonString());			
+			log("upload descriptor: " + uploadDescriptor.toJsonString());
+		}
 	}
 
-	private void handleFilePart(String filename, Part part, UploadDescriptor uploadDescriptor) throws ServletException {
+	private void handleFilePart(String filename, Part part, UploadDescriptor uploadDescriptor) throws ServletException, IOException {
 		// fetch the the uploaded files map or create it for the first time
 		FileOutputStream out = null;
 		
@@ -115,6 +127,7 @@ public class UploaderServlet extends HttpServlet {
 			int len = filecontent.read(buffer);
 			while (len != -1) {
 				uploadDescriptor.increaseBytesSoFar(len);
+				log(">>>>>>>>>>>>>>>>>>>> descriptor updated by " + len + " bytes");
 				/*
 				log(
 						"Received: " + len + " bytes, total bytes received: " + 
@@ -123,11 +136,6 @@ public class UploaderServlet extends HttpServlet {
 				*/
 				out.write(buffer, 0, len);
 				len = filecontent.read(buffer);
-			}
-		} catch (Exception e) {
-			log("Error while processing file upload: " + e.getMessage());
-			if (uploadDescriptor != null) {
-				uploadDescriptor.setErrorStatus();
 			}
 		} finally {
 			try {

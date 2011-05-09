@@ -9,16 +9,14 @@ public class UploadDescriptor implements java.io.Serializable {
 	};
 
 	private String absolutePath;
-	private int bytesSoFar;
-	private int totalBytes;
-	private int partsSoFar;
-	private int totalParts;
+	private long bytesSoFar;
+	private long totalBytes;
 	private Status status; // TODO: later an error message / exception stack trace can be incorporated
 	private String userComment;
 
 	public UploadDescriptor() {
 		userComment = absolutePath = null;
-		totalParts = bytesSoFar = partsSoFar = 0;
+		bytesSoFar = 0;
 		status = Status.DOING;
 	}
 
@@ -30,57 +28,52 @@ public class UploadDescriptor implements java.io.Serializable {
 		return absolutePath;
 	}
 
-	public synchronized void increaseBytesSoFar(int moreBytes) {
+	public synchronized void increaseBytesSoFar(long moreBytes) {
 		bytesSoFar += moreBytes;
 	}
 
-	public synchronized int getBytesSoFar() {
+	public synchronized long getBytesSoFar() {
 		return bytesSoFar;
 	}
 	
-	public synchronized void setTotalBytes(int totalBytes) {
+	public synchronized void setTotalBytes(long totalBytes) {
 		this.totalBytes = totalBytes;
 	}
 	
-	public int getTotalBytes() {
+	public long getTotalBytes() {
 		return totalBytes;
 	}
 
-	public synchronized void incrementPartsSoFar() {
-		++partsSoFar;
-		if (partsSoFar == totalParts) {
-			status = Status.DONE;
-		}
-	}
-
-	public synchronized int getPartsSoFar() {
-		return partsSoFar;
-	}
-
-	public synchronized void setTotalParts(int totalParts) {
-		this.totalParts = totalParts;
-	}
-
-	public synchronized int getTotalParts() {
-		return totalParts;
-	}
-
 	public synchronized int getPercentage() {
-		// TODO: we are cheating here a bit:
-		// COMPLETION (100% only) is counted when all the parts are received
+		// well, we are cheating here a bit:
+		// COMPLETION (100% only) is counted when all the multipart-data HTTP request parts are received
 		// ONGOING PERCENTAGE/PROGRESS is counted as long as bytes are received
 		// REASON: currently total bytes count ALL the bytes in request (including other form fields etc)
 		// so the file size will be always LESS then request body size. However, the multipart request is received fully
-		// only when all its parts are received, hence the main condition (totalParts == partsSoFar).
-		return (
-				(getTotalParts() == getPartsSoFar()) 
-					? 100 
-					: (int)(getBytesSoFar()*100/getTotalBytes())
-		);
+		// only when all its parts are received, and setDoneStatus() will be called.
+		
+		int percentage = 0;
+		switch(getStatus()) {
+		case DONE: 
+			percentage = 100;
+			break;
+
+		case ERROR:			
+		case DOING:
+			percentage = getTotalBytes() == 0 ? 0 : (int)(getBytesSoFar()*100/getTotalBytes());
+			break;		
+		}
+		
+		assert(percentage >= 0 && percentage <= 100);
+		return percentage;
 	}
 
 	public synchronized Status getStatus() {
 		return status;
+	}
+
+	public synchronized void setDoneStatus() {
+		status = Status.DONE;
 	}
 
 	public synchronized void setErrorStatus() {
