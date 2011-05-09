@@ -36,7 +36,4 @@ LIMITATIONS:
 
 KNOWN ISSUES:
 ============
-* Should not allow to press the file upload button if a file is not selected
-* The file upload form elements must become inactive right after "submit" is pressed
-* If UploadStateServlet returns application/json return type - the IE is completely screwed, if no explicit type is specified - all Chrome/FF/IE behave pretty well)
-
+* If user loads a form, then opens a dialog to choose a file to upload and CANCELS the dialog, the "Upload" button will turn active/enabled in spite of no file really was selected.

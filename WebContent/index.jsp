@@ -57,7 +57,7 @@
 	  // Return it.
 	  return httpRequest;
 	}
-	
+		
     function upload_file() {
     	// Prevent re-uploading the file without reloading the page (so that UploadDescriptor will be re-initialized).
 		var overlay = document.getElementById('overlay') || document.createElement('div');
@@ -70,12 +70,13 @@
     }
 
     function update_progress() {
-    	var http = createRequestObject();    	
-    	var request = 'UploadStateServlet';
+       	var http = createRequestObject();    	
+       	var request = 'UploadStateServlet';
+       	
+   		http.open('get', request);		
+   		http.onreadystatechange = function() { display_progress(http); };
+   		http.send(null);    		
     	
-		http.open('get', request);		
-		http.onreadystatechange = function() { display_progress(http); };
-		http.send(null);
 		return false; 
    	} 
     	
@@ -149,7 +150,7 @@
 </script>
 
 </head>
-<body>
+<body onload="document.getElementById('uploadSubmitButton').disabled=true;" >
 
 <jsp:scriptlet>
 // first, replace the upload descriptor - currently there can be only one file at a time, any previous info is irrelevant
@@ -178,7 +179,7 @@ however, my purpose was to learn as much as I can, hence not used any kind of cl
 <form enctype="multipart/form-data" id="upload_form" name="upload_form" method="POST" action="UploaderServlet" onsubmit="upload_file(); return true;" target="upload_target">
 <p>
     <label for="file">Choose a file:</label>
-    <input id="file" type="file" size="27" name="file"/>
+    <input id="file" type="file" size="27" name="file" onclick="document.getElementById('uploadSubmitButton').disabled=false;"/>
 	<input value="Upload" id="uploadSubmitButton" name="uploadSubmitButton" type="submit"/>
 </p>  
 </form> 
