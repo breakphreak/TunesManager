@@ -44,7 +44,7 @@ public class UploaderServlet extends HttpServlet {
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		//response.setContentType("application/json");
+		// response.setContentType("text/javascript");
 		
 		Set<String> upload_filenames = new HashSet<String>(); // to be used later to validate that only single file is being submitted
 		HttpSession session = request.getSession(false); // the session should be pre-created by JSP

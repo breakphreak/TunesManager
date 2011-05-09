@@ -1,21 +1,24 @@
 The SoundCloud developer position challenge. Implemented in Java/Servlets 3.0.
 
 SERVER-SIDE TECHNOLOGY SELECTION:
+================================
 * Didn't selected Ruby/Python/Haskell as never programmed in those langs (yet)
 * Didn't selected PHP as multipart/form-data upload functionality can be handled only when using PHP extensions (APC etc) and the challenge mentioned "minimal dependency".
 * Didn't selected node.js as the product seems to evolve much faster then its documentation on the web
 * Implemented in Java/Servlets: highlights from back then, mature framework/library, solid documentation and plenty of examples on the web, mature development/deployment tools
 
 CLIENT-SIDE TECHNOLOGY:
+======================
 * Plain JavaScript, no libraries (as requested)
 
 DESIGN BIRDVIEW:
+===============
 JSP pages:
 * One (entry) JSP page: index.jsp that opens/resets the session, presents the file upload form and the comment update form
 * One JSP page the application errors land to
 
 Servlets:
-** UploaderServlet - handles a multipart/form-data request and saves the data into the file on the server
+** UploaderServlet - handles a multipart/form-data request and saves the data into the file on the server. The files are kept in a well-put-away-aside-of-application folder on server, so that the direct link can never be supplied to the user.
 ** RetrieverServlet - receives a filename of the uploaded file and streams the file contents to the user
 ** UploadStateServlet - returns an information regarding the file being uploaded (completion percentage etc)
 
@@ -25,7 +28,15 @@ Infrastructure classes:
 * Constants - I don't really need to tell you what to expect, right? :)
 
 LIMITATIONS:
+===========
 * Single file can be uploaded at a time
 * Once a file is uploaded, the form/session must be reset in order to upload more files
 * Intolerance to "forward/back" browser buttons
+* The filenames contain a random token. Pros: files with the same names can be uploaded, the file extension (if presents) is being kept intact. Cons: the filenames of the uploaded file and the file being uploaded are not the same.
+
+KNOWN ISSUES:
+============
+* Should not allow to press the file upload button if a file is not selected
+* The file upload form elements must become inactive right after "submit" is pressed
+* If UploadStateServlet returns application/json return type - the IE is completely screwed, if no explicit type is specified - all Chrome/FF/IE behave pretty well)
 

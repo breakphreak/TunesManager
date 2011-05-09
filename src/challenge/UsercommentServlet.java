@@ -23,7 +23,7 @@ public class UsercommentServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.setContentType("application/json");
+		// response.setContentType("application/json");
 		
 		HttpSession session = request.getSession(false); // the session should be pre-created by JSP
 		

@@ -14,6 +14,8 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
 <title>Tunes Uploader</title>
 
+<link rel="stylesheet" href="style.css" type="text/css"/>
+
 <script type="text/javascript"> 
 	var XMLHTTPREQUEST_MS_PROGIDS = new Array(
 		"Msxml2.XMLHTTP.7.0",
@@ -57,10 +59,13 @@
 	}
 	
     function upload_file() {
-    	// TODO: Prevent re-uploading the file without reloading the page (so that UploadDescriptor will be re-initialized).
-    	// Can be followed in a better way, but good enough at this stage.
-    	// document.getElementById('uploadSubmitButton').disabled = true;
-    	// document.getElementById('file').disabled = true;
+    	// Prevent re-uploading the file without reloading the page (so that UploadDescriptor will be re-initialized).
+		var overlay = document.getElementById('overlay') || document.createElement('div');
+		overlay.id = 'overlay';
+		var form = document.getElementById('upload_form');
+		form.appendChild(overlay);
+		
+		// update the progress bar
     	update_progress();
     }
 
@@ -90,7 +95,7 @@
 		        		again = true;
 		    		} else if (status == 'DONE'){
 		        		document.getElementById('progress_bar').innerHTML = 
-		        			"Uploaded 100% (" + resp['totalBytes'] + " bytes)! Your file is &lt;a href=\"" + resp['url'] + "\"/&gt;" + "here" + "&lt;/a&gt;";
+		        			"Uploaded 100% (" + resp['totalBytes'] + " bytes)! Your file is &lt;a href=\"" + resp['url'] + "\"/&gt;" + "here" + "&lt;/a&gt;. Reload the page to upload another one.";
 		    		} else if (status == 'ERROR') {
 		    			document.getElementById('progress_bar').innerHTML = "Error while uploading!";
 		    		} else {
@@ -133,7 +138,7 @@
 					} else if (comment) {
 						document.getElementById('comment_bar').innerHTML = "User comment set (" + comment + ")";	
 					} else {
-						document.getElementById('comment_bar').innerHTML = "User comment set as empty";
+						document.getElementById('comment_bar').innerHTML = "User comment set as empty.";
 					}
 				} catch (ex) {
 					document.getElementById('progress_bar').innerHTML = "Wrong response received: " + http.responseText + "! Fix the server-side code.";
@@ -171,18 +176,19 @@ however, my purpose was to learn as much as I can, hence not used any kind of cl
 
 <!-- File upload form -->
 <form enctype="multipart/form-data" id="upload_form" name="upload_form" method="POST" action="UploaderServlet" onsubmit="upload_file(); return true;" target="upload_target">
-Choose a file <br /> 
-<input name="file" size="27" type="file" id="file" /> <br/>  
-<input type="submit" name="uploadSubmitButton" id="uploadSubmitButton" value="Upload" /><br /> 
-<br />  
+<p>
+    <label for="file">Choose a file:</label>
+    <input id="file" type="file" size="27" name="file"/>
+	<input value="Upload" id="uploadSubmitButton" name="uploadSubmitButton" type="submit"/>
+</p>  
 </form> 
 
 <!-- Comment submission form -->
 <form enctype="text/plain" id="usercomment_form" method="GET" action="" onsubmit="set_usercomment(); return false;" target="usercomment_target">
-Type your comment here:<br/>
-<input name="usercomment" id="usercomment" type="text" size="50"/>
-<input type="submit" name="usercommentSubmitButton" id="usercommentSubmitButton" value="Set Comment" /><br />
-<br/>
+<p>
+    <label for="usercomment">Type your comment here:</label>
+    <input size="50" type="text" id="usercomment" name="usercomment"/> <input value="Set Comment" id="usercommentSubmitButton" name="usercommentSubmitButton" type="submit"/>
+</p>
 </form>
 
 <div id="progress_bar">
