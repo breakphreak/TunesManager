@@ -34,20 +34,8 @@ public class UploadStateServlet extends HttpServlet {
 			throw new ServletException("Illegal application state: no session had been opened yet");
 		}
 
-		Object upload_descriptor_obj = session.getAttribute(Constants.UPLOAD_DESCRIPTOR_KEY);
-		UploadDescriptor upload_descriptor = UploadDescriptor.UNKNOWN;
-		
-		if (upload_descriptor_obj != null) {
-			if (!(upload_descriptor_obj instanceof UploadDescriptor)) {
-				throw new ServletException(
-						"Illegal application state: wrong object type had been found in session under \"" + Constants.UPLOAD_DESCRIPTOR_KEY + "\" key: " +
-						"Expected: " + UploadDescriptor.class.getName() + ", found: " + upload_descriptor_obj.getClass().getName() + ""
-					);
-			}
-			
-			upload_descriptor = (UploadDescriptor)upload_descriptor_obj;
-		}
-		
+		UploadDescriptor upload_descriptor = SessionResourceManager.getUploadDescriptor(request);
+				
 		PrintWriter pw = response.getWriter();
 		pw.println(upload_descriptor.toJsonString());
 	}

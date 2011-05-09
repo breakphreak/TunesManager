@@ -5,14 +5,8 @@ public class UploadDescriptor implements java.io.Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public enum Status {
-		UNKNOWN, DOING, DONE, ERROR
+		DOING, DONE, ERROR
 	};
-
-	public static final UploadDescriptor UNKNOWN; // kinda NULL/notfound descriptor
-	static {
-		UNKNOWN = new UploadDescriptor();
-		UNKNOWN.status = Status.UNKNOWN;
-	}
 
 	private String absolutePath;
 	private int bytesSoFar;

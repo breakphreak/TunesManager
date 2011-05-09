@@ -35,6 +35,8 @@ public class UploaderServlet extends HttpServlet {
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setContentType("application/json");
+		
 		Set<String> upload_filenames = new HashSet<String>(); // to be used later to validate that only single file is being submitted
 		HttpSession session = request.getSession(false); // the session should be pre-created by JSP
 		
@@ -42,10 +44,7 @@ public class UploaderServlet extends HttpServlet {
 			throw new ServletException("Illegal application state: no session had been opened yet");
 		}
 		
-		// first, replace the upload descriptor - currently there can be only one file at a time, any previous info is irrelevant
-		UploadDescriptor uploadDescriptor = new UploadDescriptor();
-		session.setAttribute(Constants.UPLOAD_DESCRIPTOR_KEY, uploadDescriptor);
-		
+		UploadDescriptor uploadDescriptor = SessionResourceManager.getUploadDescriptor(request); // will throw exception if upload descriptor is not in the session
 		uploadDescriptor.setTotalBytes(request.getContentLength()); // form size = file size + other input fields size
 
 		Collection<Part> parts = request.getParts();
@@ -80,6 +79,9 @@ public class UploaderServlet extends HttpServlet {
 			}
 			uploadDescriptor.incrementPartsSoFar();
 			log("upload descriptor: " + uploadDescriptor.toJsonString());
+			
+			PrintWriter pw = response.getWriter();
+			pw.println(uploadDescriptor.toJsonString());
 		}
 	}
 
