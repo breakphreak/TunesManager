@@ -8,24 +8,24 @@ public class UploadDescriptor implements java.io.Serializable {
 		DOING, DONE, ERROR
 	};
 
-	private String absolutePath;
+	private String retrieveUrl;
 	private long bytesSoFar;
 	private long totalBytes;
 	private Status status; // TODO: later an error message / exception stack trace can be incorporated
 	private String userComment;
 
 	public UploadDescriptor() {
-		userComment = absolutePath = null;
+		userComment = retrieveUrl = null;
 		bytesSoFar = 0;
 		status = Status.DOING;
 	}
 
-	public synchronized void setAbsolutePath(String filename) {
-		this.absolutePath = filename;
+	public synchronized void setRetrieveUrl(String retrieveUrl) {
+		this.retrieveUrl = retrieveUrl;
 	}
 
-	public synchronized String getAbsolutePath() {
-		return absolutePath;
+	public synchronized String getRetrieveUrl() {
+		return retrieveUrl;
 	}
 
 	public synchronized void increaseBytesSoFar(long moreBytes) {
@@ -91,7 +91,9 @@ public class UploadDescriptor implements java.io.Serializable {
 			userCommentString = " , \"userComment\" : \"" + getUserComment() + "\"";
 		}
 		
-		return "{ \"status\" : \"" + getStatus() + "\", \"progress\" : " + getPercentage() + statusString + userCommentString + " }";
+		return 
+			"{ \"status\" : \"" + getStatus() + "\", \"progress\" : " + getPercentage() + 
+			", \"url\" : \"" + getRetrieveUrl() + "\"" + statusString + userCommentString + " }";
 	}
 
 	public void setUserComment(String userComment) {

@@ -13,12 +13,14 @@ public class UploaderServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private File uploadDir;
+	private String applicationPathPrefix;
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-
+		applicationPathPrefix = config.getServletContext().getContextPath();
+		
 		// Read the uploadDir from the servlet parameters
-		String uploadDirName = config.getInitParameter("uploadDir");
+		String uploadDirName = config.getServletContext().getInitParameter(Constants.UPLOAD_DIR);
 
 		if (uploadDirName == null) {
 			throw new ServletException("Please supply uploadDir parameter");
@@ -96,26 +98,35 @@ public class UploaderServlet extends HttpServlet {
 			log("upload descriptor: " + uploadDescriptor.toJsonString());
 		}
 	}
-
+		
 	private void handleFilePart(String filename, Part part, UploadDescriptor uploadDescriptor) throws ServletException, IOException {
 		// fetch the the uploaded files map or create it for the first time
 		FileOutputStream out = null;
 		
 		try {
 			File uploadFile;
-			if (uploadDescriptor.getAbsolutePath() == null) {
+
+			if (uploadDescriptor.getRetrieveUrl() == null) {
 				// new file (first time): register the upload descriptor into an http session
 				
-				uploadFile = File.createTempFile(filename, "tmp", uploadDir); // TODO: keep the original file extension
-				uploadDescriptor.setAbsolutePath(uploadFile.getAbsolutePath());
+				// keep the extension of the original file
 				
-				log("upload descriptor created: " + uploadDescriptor.toJsonString());
+				String name, extension;
+				int delimiter = filename.lastIndexOf('.');
+				
+				if (delimiter == -1) {
+					name = filename + "_";
+					extension = "";
+				} else {
+					name = filename.substring(0, delimiter-1) + "_";
+					extension = "." + filename.substring(delimiter+1);				
+				}
+				
+				uploadFile = File.createTempFile(name, extension, uploadDir); // a random number will be appended to the file name, original extension will be kept
+				uploadDescriptor.setRetrieveUrl(applicationPathPrefix + "/RetrieverServlet?filename=" + uploadFile.getName());
 			} else {
-				// known file (subsequent times): fetch the upload descriptor
-								
-				uploadFile = new File(uploadDescriptor.getAbsolutePath());
-				
-				log("file descriptor found: " + uploadDescriptor.toJsonString());
+				// known file (subsequent times): fetch the upload descriptor								
+				uploadFile = new File(uploadDescriptor.getRetrieveUrl());
 			}
 
 			out = new FileOutputStream(uploadFile, true); // open stream for append

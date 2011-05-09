@@ -59,8 +59,8 @@
     function upload_file() {
     	// TODO: Prevent re-uploading the file without reloading the page (so that UploadDescriptor will be re-initialized).
     	// Can be followed in a better way, but good enough at this stage.
-    	document.getElementById('uploadSubmitButton').disabled = true;
-    	document.getElementById('file').disabled = true;
+    	// document.getElementById('uploadSubmitButton').disabled = true;
+    	// document.getElementById('file').disabled = true;
     	update_progress();
     }
 
@@ -89,7 +89,8 @@
 		        		document.getElementById('progress_bar').innerHTML = "Uploaded: " + resp['progress'] + "%";
 		        		again = true;
 		    		} else if (status == 'DONE'){
-		        		document.getElementById('progress_bar').innerHTML = "Uploaded 100% (" + resp['totalBytes'] + " bytes)! Your file is here: " + resp['url'];
+		        		document.getElementById('progress_bar').innerHTML = 
+		        			"Uploaded 100% (" + resp['totalBytes'] + " bytes)! Your file is &lt;a href=\"" + resp['url'] + "\"/&gt;" + "here" + "&lt;/a&gt;";
 		    		} else if (status == 'ERROR') {
 		    			document.getElementById('progress_bar').innerHTML = "Error while uploading!";
 		    		} else {
