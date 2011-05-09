@@ -32,24 +32,11 @@ public class UsercommentServlet extends HttpServlet {
 		} 
 		
 		UploadDescriptor uploadDescriptor = SessionResourceManager.getUploadDescriptor(request);
-		String userComment = request.getParameter("usercomment");
+		String userComment = (String)request.getParameter("usercomment");
 		
-		if (userComment != null) {
-			userComment = userComment.trim();
-			if (userComment.length() != 0) {
-				uploadDescriptor.setUserComment(userComment);
-			}
-		}		
+		uploadDescriptor.setUserComment(userComment);
 		
 		PrintWriter pw = response.getWriter();
 		pw.println(uploadDescriptor.toJsonString());
 	}
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		doGet(request, response);
-	}
-
 }

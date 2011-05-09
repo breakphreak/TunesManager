@@ -86,20 +86,19 @@ public class UploadDescriptor implements java.io.Serializable {
 	public synchronized String toJsonString() {
 		String statusString = new String();		
 		if (getStatus() == Status.DONE) {
-			statusString = " , \"totalBytes\" : " + totalBytes;
+			statusString = " , \"totalBytes\" : " + getTotalBytes();
 		}
 		
 		String userCommentString = new String();
 		if (getUserComment() != null)  {
-			userCommentString = " , \"userComment\" : " + getUserComment();
+			userCommentString = " , \"userComment\" : \"" + getUserComment() + "\"";
 		}
 		
 		return "{ \"status\" : \"" + getStatus() + "\", \"progress\" : " + getPercentage() + statusString + userCommentString + " }";
 	}
 
 	public void setUserComment(String userComment) {
-		String tmp = userComment.trim();
-		this.userComment = ( tmp.length() == 0 ? null : tmp ); 
+		this.userComment = userComment.trim(); 
 	}
 
 	public String getUserComment() {
