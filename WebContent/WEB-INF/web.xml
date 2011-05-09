@@ -16,6 +16,7 @@
       <param-name>uploadDir</param-name>
       <param-value>C:\tmp_labs</param-value>
     </init-param>
+    <multipart-config/>
   </servlet>
   <servlet-mapping>
     <servlet-name>UploaderServlet</servlet-name>

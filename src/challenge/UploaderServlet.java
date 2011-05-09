@@ -5,12 +5,10 @@ import java.util.*;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
-import javax.servlet.annotation.MultipartConfig;
 
 /**
  * Processes the form, uploads the file and puts all the relevant upload-related info into the http session.
  */
-@MultipartConfig(location = "c:\\tmp_labs") // , fileSizeThreshold=1024*1024*10, maxFileSize=1024*1024*100, maxRequestSize=1024*1024*5*100)
 public class UploaderServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -29,13 +27,22 @@ public class UploaderServlet extends HttpServlet {
 		log("uploadDir: " + uploadDirName);
 
 		uploadDir = new File(uploadDirName);
-		if (!uploadDir.isDirectory()) {
-			throw new ServletException("Supplied uploadDir " + uploadDirName + " is invalid (not a directory)");
+		if (!uploadDir.exists()) {
+			try {
+				uploadDir.createNewFile();
+			} catch (IOException e) {
+				throw new ServletException("Failed to create upload dir", e);
+			}
+		} else {
+			if (!uploadDir.isDirectory()) {
+				throw new ServletException("Supplied uploadDir " + uploadDirName + " is invalid (not a directory)");
+			}
 		}
+		log("uploading to: " + uploadDir.getAbsolutePath());
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.setContentType("application/json");
+		//response.setContentType("application/json");
 		
 		Set<String> upload_filenames = new HashSet<String>(); // to be used later to validate that only single file is being submitted
 		HttpSession session = request.getSession(false); // the session should be pre-created by JSP
@@ -47,16 +54,10 @@ public class UploaderServlet extends HttpServlet {
 		UploadDescriptor uploadDescriptor = SessionResourceManager.getUploadDescriptor(request); // will throw exception if upload descriptor is not in the session
 		
 		try {
-			uploadDescriptor.setTotalBytes(request.getContentLength()); // form size = file size + other input fields size
-	
+			uploadDescriptor.setTotalBytes(request.getContentLength()); // form size = file size + other input fields size	
 			Collection<Part> parts = request.getParts();
-			
-			int partsCount = parts.size();
-			int currentPart = 0;
-	
+				
 			for (Part part : parts) {
-				log("----- [START] processing part " + ++currentPart + " of " + partsCount);
-	
 				String filename = getFilename(part);
 	
 				if (filename == null) {
@@ -81,8 +82,6 @@ public class UploaderServlet extends HttpServlet {
 				} else {
 					log("filename was empty, will do nothing");
 				}
-				
-				log("----- [END] processing part " + ++currentPart + " of " + partsCount);
 			}
 
 			uploadDescriptor.setDoneStatus();
@@ -127,13 +126,6 @@ public class UploaderServlet extends HttpServlet {
 			int len = filecontent.read(buffer);
 			while (len != -1) {
 				uploadDescriptor.increaseBytesSoFar(len);
-				log(">>>>>>>>>>>>>>>>>>>> descriptor updated by " + len + " bytes");
-				/*
-				log(
-						"Received: " + len + " bytes, total bytes received: " + 
-						uploadDescriptor.getBytesSoFar() + ", expected to receive about " + uploadDescriptor.getTotalBytes() + " bytes"
-				);
-				*/
 				out.write(buffer, 0, len);
 				len = filecontent.read(buffer);
 			}

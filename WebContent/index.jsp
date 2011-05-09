@@ -48,15 +48,19 @@
 	  }
 
 	  // Display an error if we couldn't create one.
-	  if (httpRequest == null)
-	    alert("Error in HttpRequest():\n\n"
-	      + "Cannot create an XMLHttpRequest object.");
+	  if (httpRequest == null) {
+	    alert("Error in HttpRequest():\n\n" + "Cannot create an XMLHttpRequest object.");
+	  }
 
 	  // Return it.
 	  return httpRequest;
 	}
 	
     function upload_file() {
+    	// TODO: Prevent re-uploading the file without reloading the page (so that UploadDescriptor will be re-initialized).
+    	// Can be followed in a better way, but good enough at this stage.
+    	document.getElementById('uploadSubmitButton').disabled = true;
+    	document.getElementById('file').disabled = true;
     	update_progress();
     }
 
@@ -108,7 +112,8 @@
     	var request = 'UsercommentServlet?' + data;
     	
 		http.open('GET', request);
-		http.onreadystatechange = function() { display_comment(http); };
+		// cool lambda calculus trick: the callback should be with zero arguments, but 'http' must be shared between 'set_usercomment()' and a 'display_comment()' callback
+		http.onreadystatechange = function() { display_comment(http); }; 
 		http.send(data);
 		return false; 
     }
@@ -145,17 +150,37 @@
 SessionResourceManager.createUploadDescriptor(request);
 </jsp:scriptlet>
 
+<!--
+The forms management is a bit tricky, so here are the few useful things I've learned along the way:
+Let's start from the second (comment submission form) as it is more straightforward:
+- the 'onsubmit()' handler returns false, meaning no need to execute an 'action'
+- the AJAX request is sent anyways by 'set_usercomment()' as it is triggered by pressing on the 'submit' button
+- the data is (supposed to be) relatively small and can be transferred as a part of a regular 'GET' request
+
+The file upload form is more cumbersome and I am almost sure about better ways to implement the functionality,
+however, my purpose was to learn as much as I can, hence not used any kind of client-side libraries. Anyways:
+- the 'onsubmit()' handler returns true, so that 'action' is being executed.
+- the 'action' calls UploaderServlet URL and it's being triggered by 'upload_file()' which is called when submitting a form.
+- the  'upload_file()' utilizes 'upload_progress()' and 'display_progress()' to display the upload progress
+- the upload progress comes from the server side (!), means that (delayed by network latency)
+  the percentage starts to increase on the server side after the bytes had been arrived to server.
+  Some browsers (such as Chrome) count bytes that were sent (!) to the server and for big files
+  those two percentages (client-side vs. server-side) can differ dramatically, which is Ok :)  
+ -->
+
+<!-- File upload form -->
 <form enctype="multipart/form-data" id="upload_form" name="upload_form" method="POST" action="UploaderServlet" onsubmit="upload_file(); return true;" target="upload_target">
 Choose a file <br /> 
 <input name="file" size="27" type="file" id="file" /> <br/>  
-<input type="submit" name="uploadSubmitButton" value="Upload" /><br /> 
+<input type="submit" name="uploadSubmitButton" id="uploadSubmitButton" value="Upload" /><br /> 
 <br />  
 </form> 
 
+<!-- Comment submission form -->
 <form enctype="text/plain" id="usercomment_form" method="GET" action="" onsubmit="set_usercomment(); return false;" target="usercomment_target">
 Type your comment here:<br/>
 <input name="usercomment" id="usercomment" type="text" size="50"/>
-<input type="submit" name="usercommentSubmitButton" value="Set Comment" /><br />
+<input type="submit" name="usercommentSubmitButton" id="usercommentSubmitButton" value="Set Comment" /><br />
 <br/>
 </form>
 
